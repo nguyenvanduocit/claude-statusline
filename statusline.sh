@@ -212,7 +212,7 @@ if [ "$total_cost" != "null" ] && (( $(echo "$total_cost > 0" | bc -l) )); then
         fi
     fi
 
-    cost_info="$(printf '\033[1;38;5;255;48;5;53m') 💰 ${cost_display} (↑${lifetime_display}) $(printf '\033[0m')${burn_rate_info}"
+    cost_info="$(printf '\033[1;38;5;255;48;5;53m') 💰 S:${cost_display} L:${lifetime_display} $(printf '\033[0m')${burn_rate_info}"
 fi
 
 # Calculate context window percentage
