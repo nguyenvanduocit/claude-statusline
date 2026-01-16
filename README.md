@@ -14,9 +14,7 @@ A custom statusline for Claude Code with cost tracking, burn rate monitoring, an
 
 ## Preview
 
-```
-🌿 main +15 -3  🤖 Opus  🔋 45%  💰 $1.25 (↑$15.50)  🔥 S:2.3¢/m L:1.5¢/m
-```
+![Statusline Preview](preview.png)
 
 ## Installation
 
