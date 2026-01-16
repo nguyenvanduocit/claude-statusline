@@ -222,7 +222,7 @@ if [ "$usage" != "null" ]; then
     size=$(echo "$input" | jq '.context_window.context_window_size')
     if [ "$size" -gt 0 ]; then
         pct=$((current * 100 / size))
-        context_info="$(printf '\033[1;38;5;255;48;5;58m') 🔋 ${pct}% $(printf '\033[0m')"
+        context_info="$(printf '\033[1;38;5;255;48;5;58m') 🧠 ${pct}% $(printf '\033[0m')"
     fi
 fi
 
