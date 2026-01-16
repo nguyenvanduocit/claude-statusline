@@ -6,7 +6,7 @@ A custom statusline for Claude Code with cost tracking, burn rate monitoring, an
 
 ## Features
 
-- **Cost Tracking** - Real-time session cost calculation based on model pricing
+- **Cost Tracking** - Real-time session cost from Claude Code API (no hardcoded pricing)
 - **Lifetime Stats** - Tracks total spending across all sessions
 - **Burn Rate** - Shows cost per minute (session and lifetime average)
 - **Git Integration** - Displays current branch with insertions/deletions
@@ -50,15 +50,6 @@ To reset stats:
 ```bash
 rm ~/.claude/lifetime-cost.json ~/.claude/session-timing.json
 ```
-
-## Model Pricing (January 2025)
-
-| Model      | Input (per 1M) | Output (per 1M) |
-| ---------- | -------------- | --------------- |
-| Opus 4.5   | $15.00         | $75.00          |
-| Sonnet 4.5 | $3.00          | $15.00          |
-| Sonnet 3.5 | $3.00          | $15.00          |
-| Haiku 3.5  | $0.80          | $4.00           |
 
 ## Dependencies
 

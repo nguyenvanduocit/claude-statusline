@@ -18,7 +18,6 @@ input=$(cat)
 
 # Extract basic info
 model=$(echo "$input" | jq -r '.model.display_name')
-model_id=$(echo "$input" | jq -r '.model.id')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir')
 session_id=$(echo "$input" | jq -r '.session_id')
 
@@ -45,40 +44,6 @@ if git -C "$cwd" rev-parse --git-dir >/dev/null 2>&1; then
         git_info="$(printf '\033[1;38;5;255;48;5;22m') 🌿 ${branch}${changes} $(printf '\033[0m')"
     fi
 fi
-
-# Calculate cost based on model pricing (per million tokens)
-# Pricing as of January 2025
-get_price() {
-    local model_id="$1"
-    local token_type="$2"  # input or output
-
-    case "$model_id" in
-        claude-opus-4-5*)
-            [ "$token_type" = "input" ] && echo "15.00" || echo "75.00"
-            ;;
-        claude-sonnet-4-5*)
-            [ "$token_type" = "input" ] && echo "3.00" || echo "15.00"
-            ;;
-        claude-3-5-sonnet*)
-            [ "$token_type" = "input" ] && echo "3.00" || echo "15.00"
-            ;;
-        claude-3-5-haiku*)
-            [ "$token_type" = "input" ] && echo "0.80" || echo "4.00"
-            ;;
-        claude-3-opus*)
-            [ "$token_type" = "input" ] && echo "15.00" || echo "75.00"
-            ;;
-        claude-3-sonnet*)
-            [ "$token_type" = "input" ] && echo "3.00" || echo "15.00"
-            ;;
-        claude-3-haiku*)
-            [ "$token_type" = "input" ] && echo "0.25" || echo "1.25"
-            ;;
-        *)
-            echo "0"
-            ;;
-    esac
-}
 
 # Update lifetime cost and minutes tracking
 update_lifetime_cost() {
@@ -166,22 +131,11 @@ track_session_timing() {
 # Calculate context window percentage and cost
 context_info=""
 cost_info=""
-total_tokens=$(echo "$input" | jq '.context_window.total_input_tokens + .context_window.total_output_tokens')
 
-if [ "$total_tokens" != "null" ] && [ "$total_tokens" -gt 0 ]; then
-    # Get pricing
-    input_price=$(get_price "$model_id" "input")
-    output_price=$(get_price "$model_id" "output")
+# Get cost directly from Claude Code response
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 
-    # Calculate total cost
-    total_input=$(echo "$input" | jq '.context_window.total_input_tokens')
-    total_output=$(echo "$input" | jq '.context_window.total_output_tokens')
-
-    # Cost = (tokens / 1,000,000) * price_per_million
-    input_cost=$(echo "scale=4; $total_input / 1000000 * $input_price" | bc)
-    output_cost=$(echo "scale=4; $total_output / 1000000 * $output_price" | bc)
-    total_cost=$(echo "scale=4; $input_cost + $output_cost" | bc)
-
+if [ "$total_cost" != "null" ] && (( $(echo "$total_cost > 0" | bc -l) )); then
     # Get elapsed minutes for this session
     elapsed_minutes=$(track_session_timing "$session_id")
 
