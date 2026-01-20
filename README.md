@@ -1,6 +1,6 @@
 # Claude Code Statusline
 
-A custom statusline for Claude Code with cost tracking, burn rate monitoring, token usage, and git integration.
+A custom statusline for Claude Code with cost tracking, burn rate monitoring, and token usage.
 
 ![statusline](https://img.shields.io/badge/Claude_Code-Statusline-blue)
 
@@ -11,7 +11,6 @@ A custom statusline for Claude Code with cost tracking, burn rate monitoring, to
 - **Cost Tracking** - Real-time session cost from Claude Code API
 - **Lifetime Stats** - Tracks total spending across all sessions
 - **Burn Rate** - Shows cost per minute (session and lifetime average)
-- **Git Integration** - Displays current branch with insertions/deletions
 - **Context Usage** - Shows context window percentage
 
 ## Preview
@@ -20,7 +19,7 @@ A custom statusline for Claude Code with cost tracking, burn rate monitoring, to
 
 **Display format:**
 ```
-🌿 main +10 -5  🤖 Opus 4.5  🧠 28% (↑53k ↓8k ⚡56k 🤖19k)  💰 S:$2.02 L:$1731  🔥 S:18¢/m L:33¢/m
+🤖 Opus 4.5  🧠 28% (↑53k ↓8k ⚡56k 🤖19k)  💰 S:$2.02 L:$1731  🔥 S:18¢/m L:33¢/m
 ```
 
 - `↑` Input tokens (cumulative)
@@ -96,8 +95,7 @@ rm ~/.claude/lifetime-cost.json ~/.claude/session-timing.json ~/.claude/agent-to
 ## Dependencies
 
 - `jq` - JSON processor
-- `bc` - Calculator
-- `git` - For branch/diff info
+- `awk` - Text processing (included in macOS/Linux)
 
 ## License
 
