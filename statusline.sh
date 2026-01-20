@@ -6,10 +6,9 @@
 input=$(cat)
 
 # Extract ALL needed values in single jq call (tab-separated)
-IFS=$'\t' read -r model cwd session_id total_cost total_input output_tokens cache_read current_ctx ctx_size < <(
+IFS=$'\t' read -r model session_id total_cost total_input output_tokens cache_read current_ctx ctx_size < <(
     echo "$input" | jq -r '[
         .model.display_name,
-        .workspace.current_dir,
         .session_id,
         (.cost.total_cost_usd // 0),
         (.context_window.total_input_tokens // 0),
@@ -19,21 +18,6 @@ IFS=$'\t' read -r model cwd session_id total_cost total_input output_tokens cach
         (.context_window.context_window_size // 200000)
     ] | @tsv'
 )
-
-# Git info (only if in git repo)
-git_info=""
-if git -C "$cwd" rev-parse --git-dir >/dev/null 2>&1; then
-    branch=$(git -C "$cwd" rev-parse --abbrev-ref HEAD 2>/dev/null)
-    if [ -n "$branch" ]; then
-        diff_stat=$(git -C "$cwd" --no-optional-locks diff --stat 2>/dev/null | tail -1)
-        insertions=$(echo "$diff_stat" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+')
-        deletions=$(echo "$diff_stat" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+')
-        changes=""
-        [ -n "$insertions" ] && changes=" +${insertions}"
-        [ -n "$deletions" ] && changes="${changes} -${deletions}"
-        git_info=$'\033[1;38;5;255;48;5;22m'" 🌿 ${branch}${changes} "$'\033[0m'
-    fi
-fi
 
 # Format tokens (K for thousands) - pure bash
 format_tokens() {
@@ -149,4 +133,4 @@ if [ "$ctx_size" -gt 0 ] 2>/dev/null; then
 fi
 
 # Output
-printf "%s"$'\033[1;38;5;255;48;5;24m'" 🤖 %s "$'\033[0m'"%s%s" "$git_info" "$model" "$context_info" "$cost_info"
+printf $'\033[1;38;5;255;48;5;24m'" 🤖 %s "$'\033[0m'"%s%s" "$model" "$context_info" "$cost_info"
