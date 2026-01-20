@@ -215,14 +215,53 @@ if [ "$total_cost" != "null" ] && (( $(echo "$total_cost > 0" | bc -l) )); then
     cost_info="$(printf '\033[1;38;5;255;48;5;53m') 💰 S:${cost_display} L:${lifetime_display} $(printf '\033[0m')${burn_rate_info}"
 fi
 
-# Calculate context window percentage
+# Format token counts (use K for thousands)
+format_tokens() {
+    local tokens=$1
+    if [ "$tokens" -ge 1000 ]; then
+        echo "$(echo "scale=1; $tokens / 1000" | bc)k"
+    else
+        echo "$tokens"
+    fi
+}
+
+# Get agent tokens from hook tracking
+agent_tokens=0
+agent_tokens_file="$HOME/.claude/agent-tokens.json"
+if [ -f "$agent_tokens_file" ]; then
+    agent_tokens=$(cat "$agent_tokens_file" | jq -r ".\"$session_id\" // 0")
+fi
+
+# Calculate context window percentage and token counts
 usage=$(echo "$input" | jq '.context_window.current_usage')
+context=$(echo "$input" | jq '.context_window')
 if [ "$usage" != "null" ]; then
+    # Get cumulative token counts (total across session, not just last call)
+    input_tokens=$(echo "$context" | jq '.total_input_tokens // 0')
+    output_tokens=$(echo "$context" | jq '.total_output_tokens // 0')
+    cache_read=$(echo "$usage" | jq '.cache_read_input_tokens // 0')
+
+    # Get total tokens used and context size
     current=$(echo "$usage" | jq '.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens')
-    size=$(echo "$input" | jq '.context_window.context_window_size')
+    size=$(echo "$context" | jq '.context_window_size')
+
+    input_display=$(format_tokens "$input_tokens")
+    output_display=$(format_tokens "$output_tokens")
+    cache_display=$(format_tokens "$cache_read")
+
+    # Build token info string with compact icons
+    token_info="↑${input_display} ↓${output_display}"
+    [ "$cache_read" -gt 0 ] && token_info="${token_info} ⚡${cache_display}"
+
+    # Add agent tokens if any
+    if [ "$agent_tokens" -gt 0 ]; then
+        agent_display=$(format_tokens "$agent_tokens")
+        token_info="${token_info} 🤖${agent_display}"
+    fi
+
     if [ "$size" -gt 0 ]; then
         pct=$((current * 100 / size))
-        context_info="$(printf '\033[1;38;5;255;48;5;58m') 🧠 ${pct}% $(printf '\033[0m')"
+        context_info="$(printf '\033[1;38;5;255;48;5;58m') 🧠 ${pct}% (${token_info}) $(printf '\033[0m')"
     fi
 fi
 
