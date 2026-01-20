@@ -19,7 +19,7 @@ A custom statusline for Claude Code with cost tracking, burn rate monitoring, an
 
 **Display format:**
 ```
-🤖 Opus 4.5  🧠 28% (↑53k ↓8k ⚡56k 🤖19k)  💰 S:$2.02 L:$1731  🔥 S:18¢/m L:33¢/m
+🤖 Opus 4.5  🧠 28% (↑53k ↓8k ⚡56k 🤖19k)  💰 S:$2.02 L:$1731.00  🔥 S:$0.18/m L:$0.33/m
 ```
 
 - `↑` Input tokens (cumulative)
