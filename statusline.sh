@@ -29,14 +29,9 @@ format_tokens() {
     fi
 }
 
-# Format cost - pure bash/awk
+# Format cost - always in dollars
 format_cost() {
-    local cost=$1
-    awk -v c="$cost" 'BEGIN {
-        if (c < 0.01) print "<1¢"
-        else if (c < 1) printf "%.0f¢", c * 100
-        else printf "$%.2f", c
-    }'
+    awk -v c="$1" 'BEGIN { printf "$%.2f", c }'
 }
 
 # Session timing
@@ -93,17 +88,16 @@ if awk -v c="$total_cost" 'BEGIN { exit (c > 0) ? 0 : 1 }'; then
         ' "$lifetime_file" > "$tmp" 2>/dev/null && mv "$tmp" "$lifetime_file"
     ) &
 
-    # Burn rate
+    # Burn rate ($/min)
     burn_info=""
     if awk -v m="$elapsed_minutes" 'BEGIN { exit (m > 0) ? 0 : 1 }'; then
-        session_burn=$(awk -v c="$total_cost" -v m="$elapsed_minutes" 'BEGIN { printf "%.1f", (c/m)*100 }')
-        session_burn_display="${session_burn}¢"
+        session_burn=$(awk -v c="$total_cost" -v m="$elapsed_minutes" 'BEGIN { printf "$%.2f", c/m }')
 
         if awk -v m="$lifetime_minutes" 'BEGIN { exit (m > 0) ? 0 : 1 }'; then
-            lifetime_burn=$(awk -v c="$lifetime_total" -v m="$lifetime_minutes" 'BEGIN { printf "%.1f", (c/m)*100 }')
-            burn_info=$'\033[1;38;5;255;48;5;52m'" 🔥 S:${session_burn_display}/m L:${lifetime_burn}¢/m "$'\033[0m'
+            lifetime_burn=$(awk -v c="$lifetime_total" -v m="$lifetime_minutes" 'BEGIN { printf "$%.2f", c/m }')
+            burn_info=$'\033[1;38;5;255;48;5;52m'" 🔥 S:${session_burn}/m L:${lifetime_burn}/m "$'\033[0m'
         else
-            burn_info=$'\033[1;38;5;255;48;5;52m'" 🔥 ${session_burn_display}/m "$'\033[0m'
+            burn_info=$'\033[1;38;5;255;48;5;52m'" 🔥 ${session_burn}/m "$'\033[0m'
         fi
     fi
 
